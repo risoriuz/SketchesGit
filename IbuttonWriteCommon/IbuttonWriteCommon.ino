@@ -61,19 +61,31 @@ void loop() {
     Serial.print(" ");
   }
 
+  // Check if read key is equal to the one to be programmed
+  for (byte x = 0; x < 8; x++) {
+    if (addr[x] != newID[x])
+      break;
+    else if (x == 7) {
+      Serial.println("...already programmed!");
+      return;
+    }
+  }
+
   //Расчет crc//
   byte crc;
   crc = ibutton.crc8(addr, 8);
   Serial.print("CRC: ");
   Serial.println(crc, HEX);
-  // Режим записи по команде из serial порта "w"
-  if ( Serial.read() == 'w' ) {
+
+  // Режим записи по команде из serial порта "t" для RW2004
+  if( Serial.read() == 't' ) {
     ibutton.skip(); ibutton.reset(); ibutton.write(0x33);
     Serial.print("  ID before write:");
     for (byte x = 0; x < 8; x++) {
       Serial.print(' ');
       Serial.print(ibutton.read(), HEX);
     }
+
     // send reset
     ibutton.skip();
     ibutton.reset();
@@ -89,7 +101,45 @@ void loop() {
     ibutton.skip();
     ibutton.reset();
     ibutton.write(0xD5);
- //   ibutton.write(0x3C);
+    //   ibutton.write(0x3C);
+    for (byte x = 0; x < 8; x++) {
+      writeByte(newID[x]);
+      Serial.print('*');
+    }
+    Serial.print('\n');
+    ibutton.reset();
+    // send 0xD1
+    ibutton.write(0xD1);
+    //send logical 1
+    digitalWrite(10, LOW); pinMode(10, OUTPUT); delayMicroseconds(10);
+    pinMode(10, INPUT); digitalWrite(10, HIGH); delay(10);
+
+  }
+  // Режим записи по команде из serial порта "w" для RW1990
+  if ( Serial.read() == 'w' ) {
+    ibutton.skip(); ibutton.reset(); ibutton.write(0x33);
+    Serial.print("  ID before write:");
+    for (byte x = 0; x < 8; x++) {
+      Serial.print(' ');
+      Serial.print(ibutton.read(), HEX);
+    }
+
+    // send reset
+    ibutton.skip();
+    ibutton.reset();
+    // send 0xD1
+    ibutton.write(0xD1);
+    // send logical 0
+    digitalWrite(10, LOW); pinMode(10, OUTPUT); delayMicroseconds(60);
+    pinMode(10, INPUT); digitalWrite(10, HIGH); delay(10);
+
+    Serial.print('\n');
+    Serial.print("  Writing iButton ID:\n    ");
+
+    ibutton.skip();
+    ibutton.reset();
+    ibutton.write(0xD5);
+    //   ibutton.write(0x3C);
     for (byte x = 0; x < 8; x++) {
       writeByte(newID[x]);
       Serial.print('*');
