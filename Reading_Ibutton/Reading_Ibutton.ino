@@ -34,19 +34,37 @@ void loop() {
   }
   Serial.print("\n");
 
-  for (byte i = 0; i < 255; i++) {
-    Serial.print("  Put commanad ");
-    Serial.print(i, HEX);
+  //RW1990(1115) 1:C2:EA:B7:1:0:0:17
+  // Отвечает НА:
+  // 0xF0    Ответ: F5:FF:FF:FF:FF:FF:FF:FF
+  // 0x0F    Ответ: 1:C2:EA:B7:1:0:0:17
+  //
+  // RW 2004
+  // c 0xF0   Ответ: 6D:DB:B6:6D:DB:B6:6D:DB
+  // по 0хFB  Ответ: 6D:DB:B6:6D:DB:B6:6D:DB
+  // 0х35            F8:FF:FF:FF:FF:FF:FF:FF
+  //------------------------------------
 
-    ibutton.skip(); ibutton.reset(); ibutton.write(i);
-    Serial.print("       Answer:");
-    for (byte x = 0; x < 8; x++) {
-      Serial.print(':');
-      Serial.print(ibutton.read(), HEX);
-    }
-    Serial.print("\n");
-    delay(500);
+  //  for (byte i = 0; i < 255; i++) {
+  //    Serial.print("  Put commanad ");
+  //    Serial.print(i, HEX);
+  //
+  //    ibutton.skip(); ibutton.reset(); ibutton.write(i);
+  //    Serial.print("       Answer:");
+  //    for (byte x = 0; x < 8; x++) {
+  //      Serial.print(':');
+  //      Serial.print(ibutton.read(), HEX);
+  //    }
+  ibutton.skip(); ibutton.reset(); ibutton.write(0xF0);
+  Serial.print("  Put commanad 0xF0");
+  Serial.print("      Answer:");
+  for (byte x = 0; x < 8; x++) {
+    Serial.print(':');
+    Serial.print(ibutton.read(), HEX);
   }
+
+  Serial.print("\n");
+  delay(500);
 }
 
 
