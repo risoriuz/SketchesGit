@@ -1,9 +1,11 @@
+
 #include <OneWire.h>
 #define pin 10
 
 OneWire ibutton (pin); // I button connected on PIN 2.
 
 byte addr[8]; //array to store the Ibutton ID.
+byte addr2[8];
 
 void setup() {
   Serial.begin(115200);
@@ -60,7 +62,11 @@ void loop() {
   Serial.print("      Answer:");
   for (byte x = 0; x < 8; x++) {
     Serial.print(':');
-    Serial.print(ibutton.read(), HEX);
+    addr2[x]= ibutton.read();
+  //  Serial.print(ibutton.read(), HEX);
+    
+    Serial.print(addr2[x], HEX);
+   
   }
 
   Serial.print("\n");
