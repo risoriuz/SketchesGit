@@ -7,6 +7,7 @@
 
 AF_DCMotor motorM1(1);  //Задний мост
 AF_DCMotor motorM3(1);  //Руль
+AF_DCMotor motorM4(1);  //передние фары
 SoftwareSerial BTSerial(A0, A1); // RX, TX
 
 char btCmd = 'S';           // Переменнвя для комманд BT
@@ -22,6 +23,10 @@ void setup() {
 
   motorM3.setSpeed(100);
   motorM3.run(RELEASE);
+  
+  motorM4.setSpeed(100);
+  motorM4.run(RELEASE);
+  pinMode(13, OUTPUT);
 }
 
 void loop() {
@@ -53,9 +58,9 @@ void loop() {
         case 'G':
           fLeft(vpsdM1);
           break;
-        case 'К':
+        case 'K':
           fRight(vpsdM1);
-          break;
+          break;  
         case 'I':
           fRight(vpsdM1);
           break;
@@ -65,6 +70,19 @@ void loop() {
         case 'J':
           bRight(vpsdM1);
           break;
+        case 'S':
+          MotorsStop();
+          break;
+          //Свет
+        case 'W':
+          digitalWrite(13, HIGH);
+          //motorM4.setSpeed(100);
+          //motorM4.run(FORWARD); 
+          break;
+        case 'w':
+           digitalWrite(13, LOW);
+          //motorM4.run(RELEASE); 
+          break;  
         default:  //Get velocity
           if (btCmd == 'q') {
             vpsdM1 = 255;  //Full velocity
