@@ -9,9 +9,9 @@ AF_DCMotor motorM1(1);  //Задний мост
 AF_DCMotor motorM3(1);  //Руль
 SoftwareSerial BTSerial(A0, A1); // RX, TX
 
-int maxSpeed = 127;   //Ограничение максимальной скорости
-char btcmd;           // Переменнвя для комманд BT
-int vpsdM1;           //Память скорости M1
+char btCmd = 'S';           // Переменнвя для комманд BT
+char prevbtCmd = 'A';
+int vpsdM1 = 0;           //Память скорости M1
 
 void setup() {
   Serial.begin(9600);              // set up Serial library at 9600 bps
@@ -28,68 +28,93 @@ void loop() {
   uint8_t i;
   if (BTSerial.available())
   {
-    btcmd = (char)BTSerial.read();
-    Serial.println(btcmd);
+    char prevbtCmd = btCmd;
+    btCmd = BTSerial.read();
+    Serial.println(btCmd);
 
-    // Вперед
-    if (btcmd == 'F') {
-      motorM1.run(FORWARD);
-      for (i = 0; i < vpsdM1; i++) {
-        motorM1.setSpeed(i);
-        delay(10);
-      }
-    }
-    
-    // Назад
-    if (btcmd == 'B') {
-      for (i = 0; i < vpsdM1; i++) {
-        motorM1.setSpeed(i);
-        delay(10);
+    if (btCmd != prevbtCmd)
+    {
+      switch (btCmd)
+      {
+        case 'F':                    //Вперед
+          motorM1.setSpeed(vpsdM1);
+          motorM1.run(FORWARD);
+          break;
+        case 'B':                    //Вперед
+          motorM1.setSpeed(vpsdM1);
+          motorM1.run(BACKWARD);
+          break;
+        case 'L':
+          motorM3.run(BACKWARD);
+          break;
+        case 'R':
+          motorM3.run(FORWARD);
+          break;
+        case 'G':
+          fLeft(vpsdM1);
+          break;
+        case 'К':
+          fRight(vpsdM1);
+          break;
+        case 'I':
+          fRight(vpsdM1);
+          break;
+        case 'H':
+          bLeft(vpsdM1);
+          break;
+        case 'J':
+          bRight(vpsdM1);
+          break;
+        default:  //Get velocity
+          if (btCmd == 'q') {
+            vpsdM1 = 255;  //Full velocity
+            motorM1.setSpeed(vpsdM1);
+          } else {
+            if (( btCmd >= 48) && (btCmd <= 57))
+            {
+              //Subtracting 48 changes the range from 48-57 to 0-9.
+              //Multiplying by 25 changes the range from 0-9 to 0-225.
+              vpsdM1 = (btCmd - 48) * 25;
+              motorM1.setSpeed(vpsdM1);
+            }
+          }
       }
     }
   }
-
-
-
 }
+
+
 // Прямо влево
-void fLeft() {
-  Speed(vpsdM1,maxSpeed);
+void fLeft(int vpsdM1) {
+  motorM1.setSpeed(vpsdM1);
   motorM1.run(FORWARD);
   motorM3.run(FORWARD);
 }
 
 // Прямо вправо
-void fRight() {
-  Speed(vpsdM1,maxSpeed);
+void fRight(int vpsdM1) {
+  motorM1.setSpeed(vpsdM1);
   motorM1.run(FORWARD);
   motorM3.run(BACKWARD);
 }
 
 // Назад влево
-void bLeft() {
-  Speed(vpsdM1,maxSpeed);
+void bLeft(int vpsdM1) {
+  motorM1.setSpeed(vpsdM1);
   motorM1.run(BACKWARD);
   motorM3.run(FORWARD);
 }
 
 // Назад направо
-void bRight() {
-  Speed(vpsdM1,maxSpeed);
+void bRight(int vpsdM1) {
+  motorM1.setSpeed(vpsdM1);
   motorM1.run(BACKWARD);
   motorM3.run(BACKWARD);
-}
-// Изменение скорости
-void Speed(int spd, int max) {
-  if (spd > max) {
-    spd = max;
-  }
-  motorM1.setSpeed(spd);
 }
 
 //Остановка моторов
 void MotorsStop() {
-    motorM1.run(RELEASE);
-    motorM3.run(RELEASE);
+  motorM1.run(RELEASE);
+  motorM3.run(RELEASE);
 }
 
