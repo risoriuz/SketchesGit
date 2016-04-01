@@ -6,13 +6,15 @@
 #include <SoftwareSerial.h>
 
 AF_DCMotor motorM1(1);  //Задний мост
-AF_DCMotor motorM3(1);  //Руль
-AF_DCMotor motorM4(1);  //передние фары
+AF_DCMotor motorM2(2);
+AF_DCMotor motorM3(3);  //Руль
+AF_DCMotor motorM4(4);  //передние фары
 SoftwareSerial BTSerial(A0, A1); // RX, TX
 
 char btCmd = 'S';           // Переменнвя для комманд BT
 char prevbtCmd = 'A';
 int vpsdM1 = 0;           //Память скорости M1
+int vpsdM3 = 30;
 
 void setup() {
   Serial.begin(9600);              // set up Serial library at 9600 bps
@@ -20,8 +22,11 @@ void setup() {
 
   motorM1.setSpeed(100);   //speed- Valid values for 'speed' are between 0 and 255 with 0 being off and 255 as full throttle.
   motorM1.run(RELEASE);
-
-  motorM3.setSpeed(100);
+  
+  motorM2.setSpeed(100);
+  motorM2.run(RELEASE);
+  
+  motorM3.setSpeed(vpsdM3);
   motorM3.run(RELEASE);
   
   motorM4.setSpeed(100);
@@ -36,9 +41,8 @@ void loop() {
     char prevbtCmd = btCmd;
     btCmd = BTSerial.read();
     Serial.println(btCmd);
-
-    if (btCmd != prevbtCmd)
-    {
+ //   if (btCmd != prevbtCmd)
+//    {
       switch (btCmd)
       {
         case 'F':                    //Вперед
@@ -50,20 +54,19 @@ void loop() {
           motorM1.run(BACKWARD);
           break;
         case 'L':
+          motorM3.setSpeed(vpsdM3);
           motorM3.run(BACKWARD);
           break;
         case 'R':
+          motorM3.setSpeed(vpsdM3);
           motorM3.run(FORWARD);
           break;
         case 'G':
           fLeft(vpsdM1);
           break;
-        case 'K':
-          fRight(vpsdM1);
-          break;  
         case 'I':
           fRight(vpsdM1);
-          break;
+          break;  
         case 'H':
           bLeft(vpsdM1);
           break;
@@ -73,16 +76,21 @@ void loop() {
         case 'S':
           MotorsStop();
           break;
-          //Свет
-        case 'W':
+          
+        case 'W': //Свет передних фар
           digitalWrite(13, HIGH);
-          //motorM4.setSpeed(100);
           //motorM4.run(FORWARD); 
           break;
         case 'w':
            digitalWrite(13, LOW);
           //motorM4.run(RELEASE); 
-          break;  
+          break;
+        case 'U': //Свет задних фар 
+          motorM2.run(FORWARD); 
+          break;
+        case 'u':
+          motorM2.run(RELEASE); 
+          break;
         default:  //Get velocity
           if (btCmd == 'q') {
             vpsdM1 = 255;  //Full velocity
@@ -97,13 +105,14 @@ void loop() {
             }
           }
       }
-    }
+//    }
   }
 }
 
 
 // Прямо влево
 void fLeft(int vpsdM1) {
+  Serial.println("fLeft");
   motorM1.setSpeed(vpsdM1);
   motorM1.run(FORWARD);
   motorM3.run(FORWARD);
@@ -111,6 +120,7 @@ void fLeft(int vpsdM1) {
 
 // Прямо вправо
 void fRight(int vpsdM1) {
+  Serial.println("fRight");
   motorM1.setSpeed(vpsdM1);
   motorM1.run(FORWARD);
   motorM3.run(BACKWARD);
@@ -118,6 +128,7 @@ void fRight(int vpsdM1) {
 
 // Назад влево
 void bLeft(int vpsdM1) {
+  Serial.println("bLeft");
   motorM1.setSpeed(vpsdM1);
   motorM1.run(BACKWARD);
   motorM3.run(FORWARD);
@@ -125,6 +136,7 @@ void bLeft(int vpsdM1) {
 
 // Назад направо
 void bRight(int vpsdM1) {
+  Serial.println("bRight");
   motorM1.setSpeed(vpsdM1);
   motorM1.run(BACKWARD);
   motorM3.run(BACKWARD);
