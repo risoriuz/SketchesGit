@@ -14,7 +14,8 @@ SoftwareSerial BTSerial(A0, A1); // RX, TX
 char btCmd = 'S';           // Переменнвя для комманд BT
 char prevbtCmd = 'A';
 int vpsdM1 = 0;           //Память скорости M1
-int vpsdM3 = 30;
+int vpsdM2 = 150;         //Яркость аврийного сигнала
+int vpsdM3 = 150;
 
 void setup() {
   Serial.begin(9600);              // set up Serial library at 9600 bps
@@ -23,7 +24,7 @@ void setup() {
   motorM1.setSpeed(100);   //speed- Valid values for 'speed' are between 0 and 255 with 0 being off and 255 as full throttle.
   motorM1.run(RELEASE);
   
-  motorM2.setSpeed(100);
+  motorM2.setSpeed(vpsdM2);
   motorM2.run(RELEASE);
   
   motorM3.setSpeed(vpsdM3);
@@ -85,10 +86,10 @@ void loop() {
            digitalWrite(13, LOW);
           //motorM4.run(RELEASE); 
           break;
-        case 'U': //Свет задних фар 
+        case 'X': //Свет задних фар 
           motorM2.run(FORWARD); 
           break;
-        case 'u':
+        case 'x':
           motorM2.run(RELEASE); 
           break;
         default:  //Get velocity
